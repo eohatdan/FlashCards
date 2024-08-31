@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+        #flashcard-container {
+            text-align: center;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 300px;
+        }
+        #phrase {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div id="flashcard-container">
+    <div id="phrase">Loading...</div>
+    <button id="flip-button">Flip</button>
+    <button id="next-button">Next</button>
+    <button id="toggle-button">Toggle Language</button>
+</div>
+
+<script>
+    let phrases = [
+        {"spanish": "Hola", "english": "Hello"},
+        {"spanish": "Adiós", "english": "Goodbye"},
+        {"spanish": "Gracias", "english": "Thank you"},
+        {"spanish": "Por favor", "english": "Please"},
+        // Add more phrases as needed
+    ];
+
+    let currentPhraseIndex = 0;
+    let showSpanishFirst = true;
+    let isFlipped = false;
+
+    // Shuffle the phrases array
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // Initialize the application
+    function init() {
+        shuffle(phrases);
+        updateFlashcard();
+    }
+
+    // Update the flashcard content
+    function updateFlashcard() {
+        const phraseElement = document.getElementById("phrase");
+        const currentPhrase = phrases[currentPhraseIndex];
+
+        if (isFlipped) {
+            phraseElement.innerText = showSpanishFirst ? currentPhrase.english : currentPhrase.spanish;
+        } else {
+            phraseElement.innerText = showSpanishFirst ? currentPhrase.spanish : currentPhrase.english;
+        }
+    }
+
+    // Handle flipping the flashcard
+    document.getElementById("flip-button").addEventListener("click", function () {
+        isFlipped = !isFlipped;
+        updateFlashcard();
+    });
+
+    // Handle showing the next flashcard
+    document.getElementById("next-button").addEventListener("click", function () {
+        currentPhraseIndex = (currentPhraseIndex + 1) % phrases.length;
+        isFlipped = false;
+        updateFlashcard();
+    });
+
+    // Handle toggling the language display
+    document.getElementById("toggle-button").addEventListener("click", function () {
+        showSpanishFirst = !showSpanishFirst;
+        isFlipped = false;
+        updateFlashcard();
+    });
+
+    // Start the app
+    init();
+</script>
+
+</body>
+</html>
