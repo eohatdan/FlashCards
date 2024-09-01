@@ -45,23 +45,45 @@
 
 <div id="flashcard-container">
     <div id="phrase">Loading...</div>
-    <button id="flip-button">Flip</button>
-    <button id="next-button">Next</button>
-    <button id="toggle-button">Toggle Language</button>
+    <button id="flip-button" disabled>Flip</button>
+    <button id="next-button" disabled>Next</button>
+    <button id="toggle-button" disabled>Toggle Language</button>
 </div>
 
 <script>
-    let phrases = [
-        {"spanish": "Hola", "english": "Hello"},
-        {"spanish": "Adiós", "english": "Goodbye"},
-        {"spanish": "Gracias", "english": "Thank you"},
-        {"spanish": "Por favor", "english": "Please"},
-        // Add more phrases as needed
-    ];
-
+    let phrases = [];
     let currentPhraseIndex = 0;
     let showSpanishFirst = true;
     let isFlipped = false;
+
+    const API_KEY = '04092021-d8fe1ecd3534';
+    const SPREADSHEET_ID = '1vkouidyZnfjWrjlggChvFmfyeKgbBMvX07zzlrxzjng';
+    const RANGE = 'Sheet1!A:B';
+
+    // Load data from Google Sheets
+    function loadPhrases() {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}?key=${API_KEY}`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const rows = data.values;
+                if (rows && rows.length > 0) {
+                    rows.forEach(row => {
+                        phrases.push({"spanish": row[0], "english": row[1]});
+                    });
+                    shuffle(phrases);
+                    updateFlashcard();
+                    enableButtons();
+                } else {
+                    document.getElementById("phrase").innerText = "No data found.";
+                }
+            })
+            .catch(error => {
+                document.getElementById("phrase").innerText = "Error loading data.";
+                console.error('Error loading data from Google Sheets:', error);
+            });
+    }
 
     // Shuffle the phrases array
     function shuffle(array) {
@@ -69,12 +91,6 @@
             const j = Math.floor(Math.random() * (i + 1));
             [array[i], array[j]] = [array[j], array[i]];
         }
-    }
-
-    // Initialize the application
-    function init() {
-        shuffle(phrases);
-        updateFlashcard();
     }
 
     // Update the flashcard content
@@ -87,6 +103,13 @@
         } else {
             phraseElement.innerText = showSpanishFirst ? currentPhrase.spanish : currentPhrase.english;
         }
+    }
+
+    // Enable buttons after data is loaded
+    function enableButtons() {
+        document.getElementById("flip-button").disabled = false;
+        document.getElementById("next-button").disabled = false;
+        document.getElementById("toggle-button").disabled = false;
     }
 
     // Handle flipping the flashcard
@@ -109,8 +132,8 @@
         updateFlashcard();
     });
 
-    // Start the app
-    init();
+    // Start the app by loading phrases from Google Sheets
+    loadPhrases();
 </script>
 
 </body>
