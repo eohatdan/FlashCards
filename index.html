@@ -62,7 +62,7 @@
 
     // Load data from Google Sheets
     function loadPhrases() {
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${'1vkouidyZnfjWrjlggChvFmfyeKgbBMvX07zzlrxzjng'}/values/${RANGE}?key=${'d8fe1ecd35341a5cfae2549e4f1bb6036cab6501'}`;
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}?key=${API_KEY}`;
         
         fetch(url)
             .then(response => response.json())
