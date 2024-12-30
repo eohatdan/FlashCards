@@ -68,7 +68,9 @@
         fetch(url)
             .then(response => response.json())
             .then(data => {
+                
                 const rows = data.values;
+                console.log("in fetch.");
                 if (rows && rows.length > 0) {
                     rows.forEach(row => {
                         phrases.push({"spanish": row[0], "english": row[1]});
