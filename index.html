@@ -67,7 +67,7 @@
 
   async function loadPhrases() {
     try {
-      const res = await fetch("https://your-flask-app.onrender.com/get_phrases"); // Replace with your Render URL
+      const res = await fetch("https://seniors-meds-2.onrender.com/ask-openai/get_phrases"); // Replace with your Render URL
       phrases = await res.json();
 
       if (!Array.isArray(phrases) || phrases.length === 0) {
