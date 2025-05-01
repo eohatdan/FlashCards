@@ -1,6 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spanish-English Flashcards</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    #container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 300px;
+    }
+
+    #phrase {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 10px 16px;
+      margin: 5px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background-color: #007BFF;
+      color: white;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<div id="container">
+  <div id="phrase">Loading...</div>
+  <button id="flip">Flip</button>
+  <button id="next">Next</button>
+  <button id="toggle">Toggle Language</button>
+</div>
+
+<script>
+  let phrases = [];
+  let index = 0;
+  let isFlipped = false;
+  let showSpanishFirst = true;
+
+  const phraseElement = document.getElementById("phrase");
+  const flipBtn = document.getElementById("flip");
+  const nextBtn = document.getElementById("next");
+  const toggleBtn = document.getElementById("toggle");
+
+  async function loadPhrases() {
+    try {
+      const res = await fetch("https://your-flask-app.onrender.com/get_phrases"); // Replace with your Render URL
+      phrases = await res.json();
+
+      if (!Array.isArray(phrases) || phrases.length === 0) {
+        phraseElement.textContent = "No phrases found.";
+        return;
+      }
+
+      shuffle(phrases);
+      showCurrentPhrase();
+    } catch (err) {
+      phraseElement.textContent = "Error loading phrases.";
+      console.error(err);
+    }
+  }
+
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  function showCurrentPhrase() {
+    const phrase = phrases[index];
+    phraseElement.textContent = showSpanishFirst ? phrase.spanish : phrase.english;
+  }
+
+  flipBtn.addEventListener("click", () => {
+    const phrase = phrases[index];
+    phraseElement.textContent = isFlipped
+      ? (showSpanishFirst ? phrase.spanish : phrase.english)
+      : (showSpanishFirst ? phrase.english : phrase.spanish);
+    isFlipped = !isFlipped;
+  });
+
+  nextBtn.addEventListener("click", () => {
+    index = (index + 1) % phrases.length;
+    isFlipped = false;
+    showCurrentPhrase();
+  });
+
+  toggleBtn.addEventListener("click", () => {
+    showSpanishFirst = !showSpanishFirst;
+    isFlipped = false;
+    showCurrentPhrase();
+  });
+
+  loadPhrases();
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flashcard App</title>
