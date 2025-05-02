@@ -48,7 +48,8 @@
       const { data, error } = await supabase
         .from('Spanish_phrases')
         .select('Spanish, English');
-
+        console.log("Query result:", data);
+        console.log("Query error:", error);
       if (error) throw error;
 
       phrases = data.map(row => ({
