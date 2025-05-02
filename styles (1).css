@@ -1,0 +1,44 @@
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background-color: #f9f9f9;
+}
+
+h1, h2 {
+  text-align: center;
+}
+
+button {
+  margin: 10px 5px;
+  padding: 12px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+  color: white;
+}
+
+input, select, textarea {
+  display: block;
+  margin: 10px auto;
+  padding: 10px;
+  width: 90%;
+  max-width: 400px;
+  box-sizing: border-box;
+}
+
+#flashcard {
+  font-size: 28px;
+  text-align: center;
+  margin: 30px auto;
+  padding: 30px;
+  width: 400px;
+  border: 2px solid #007bff;
+  border-radius: 12px;
+  background-color: #f0f8ff;
+}
