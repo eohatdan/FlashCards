@@ -1,44 +1,40 @@
-
 body {
   font-family: Arial, sans-serif;
-  margin: 20px;
+  margin: 40px;
+  text-align: center;
   background-color: #f9f9f9;
 }
 
-h1, h2 {
-  text-align: center;
+#flashcard {
+  border: 2px solid #007bff;
+  border-radius: 12px;
+  padding: 30px;
+  font-size: 28px;
+  width: 400px;
+  margin: 30px auto;
+  background-color: #f0f8ff;
 }
 
 button {
-  margin: 10px 5px;
+  margin: 10px;
   padding: 12px 20px;
   font-size: 16px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  background-color: #007bff;
+  color: white;
 }
 
 button:hover {
   background-color: #0056b3;
-  color: white;
 }
 
-input, select, textarea {
-  display: block;
-  margin: 10px auto;
+input {
+  margin: 5px;
   padding: 10px;
-  width: 90%;
-  max-width: 400px;
-  box-sizing: border-box;
-}
-
-#flashcard {
-  font-size: 28px;
-  text-align: center;
-  margin: 30px auto;
-  padding: 30px;
-  width: 400px;
-  border: 2px solid #007bff;
-  border-radius: 12px;
-  background-color: #f0f8ff;
+  font-size: 16px;
+  width: 300px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
