@@ -65,23 +65,40 @@
   const nextBtn = document.getElementById("next");
   const toggleBtn = document.getElementById("toggle");
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+  const SUPABASE_URL = 'https://ixxzxenspwzrkiazepbj.supabase.co'; // replace with your actual URL
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4eHp4ZW5zcHd6cmtpYXplcGJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM1MzE1NjMsImV4cCI6MjA1OTEwNzU2M30.28E41uParU4YMisV-Kxlq1KybbOdRrbKqXYKrH84COw'; // replace with your actual anon key
+
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
   async function loadPhrases() {
     try {
-      const res = await fetch("https://seniors-meds-2.onrender.com/ask-openai/get_phrases"); // Replace with your Render URL
-      phrases = await res.json();
+      const { data, error } = await supabase
+        .from('Spanish_phrases')
+        .select('Spanish, English');
 
-      if (!Array.isArray(phrases) || phrases.length === 0) {
-        phraseElement.textContent = "No phrases found.";
-        return;
-      }
+      if (error) throw error;
 
-      shuffle(phrases);
-      showCurrentPhrase();
+      const phrases = data.map(row => ({
+        spanish: row.Spanish,
+        english: row.English
+      }));
+
+      populateFlashcards(phrases);
+
     } catch (err) {
-      phraseElement.textContent = "Error loading phrases.";
-      console.error(err);
+      console.error('❗ Failed to load phrases from Supabase:', err.message);
     }
   }
+
+  function populateFlashcards(phrases) {
+    console.log('📋 Loaded', phrases.length, 'phrases');
+    // Replace this with your flashcard setup logic
+  }
+
+  document.addEventListener('DOMContentLoaded', loadPhrases);
+</script>
 
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
