@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,40 +17,30 @@
   <button class="next" onclick="nextCard()">➡️ Next</button>
 </div>
 
+<hr>
+
+<h3>Add New Phrase</h3>
+<input id="newSpanish" placeholder="Spanish phrase" />
+<input id="newEnglish" placeholder="English translation" />
+<br>
+<button onclick="addNewPhrase()">💾 Save Phrase</button>
+
 <script>
-  const SUPABASE_URL = 'https://ixxzxenspwzrkiazepbj.supabase.co'; // Replace with actual
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4eHp4ZW5zcHd6cmtpYXplcGJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM1MzE1NjMsImV4cCI6MjA1OTEwNzU2M30.28E41uParU4YMisV-Kxlq1KybbOdRrbKqXYKrH84COw'; // Replace with actual
+  const SUPABASE_URL = 'https://ixxzxenspwzrkiazepbj.supabase.co'; // Replace with actual URL
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4eHp4ZW5zcHd6cmtpYXplcGJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM1MzE1NjMsImV4cCI6MjA1OTEwNzU2M30.28E41uParU4YMisV-Kxlq1KybbOdRrbKqXYKrH84COw
+'; // Replace with actual key
 
   let supabase;
   let phrases = [];
   let currentIndex = 0;
   let showingSpanish = true;
 
-  function displayCard() {
-    const phrase = phrases[currentIndex];
-    document.getElementById('flashcard').innerText = showingSpanish ? phrase.spanish : phrase.english;
-    console.log("Displaying:", phrases[currentIndex]);
-
-  }
-
-  function flipCard() {
-    showingSpanish = !showingSpanish;
-    displayCard();
-  }
-
-  function nextCard() {
-    currentIndex = (currentIndex + 1) % phrases.length;
-    showingSpanish = true;
-    displayCard();
-  }
-
   async function loadPhrases() {
     try {
       const { data, error } = await supabase
         .from('Spanish_phrases')
         .select('Spanish, English');
-        console.log("Query result:", data);
-        console.log("Query error:", error);
+
       if (error) throw error;
 
       phrases = data.map(row => ({
@@ -69,6 +58,46 @@
       console.error('Failed to load phrases from Supabase:', err.message);
       document.getElementById('flashcard').innerText = 'Error loading data.';
     }
+  }
+
+  function displayCard() {
+    const phrase = phrases[currentIndex];
+    document.getElementById('flashcard').innerText = showingSpanish ? phrase.spanish : phrase.english;
+  }
+
+  function flipCard() {
+    showingSpanish = !showingSpanish;
+    displayCard();
+  }
+
+  function nextCard() {
+    currentIndex = (currentIndex + 1) % phrases.length;
+    showingSpanish = true;
+    displayCard();
+  }
+
+  async function addNewPhrase() {
+    const spanish = document.getElementById('newSpanish').value.trim();
+    const english = document.getElementById('newEnglish').value.trim();
+
+    if (!spanish || !english) {
+      alert("❗ Please enter both a Spanish and English phrase.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from('Spanish_phrases')
+      .insert([{ Spanish: spanish, English: english }]);
+
+    if (error) {
+      alert("❌ Failed to add phrase: " + error.message);
+      return;
+    }
+
+    alert("✅ Phrase added successfully!");
+    document.getElementById('newSpanish').value = '';
+    document.getElementById('newEnglish').value = '';
+    loadPhrases(); // reload to reflect new entry
   }
 
   document.addEventListener('DOMContentLoaded', () => {
