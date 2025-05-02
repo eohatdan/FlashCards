@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spanish-English Flashcards</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js" defer></script>
+</head>
+<body>
+
+<h2>Spanish-English Flashcards</h2>
+
+<div id="flashcard">Loading...</div>
+
+<div>
+  <button class="flip" onclick="flipCard()">🔄 Flip</button>
+  <button class="next" onclick="nextCard()">➡️ Next</button>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://your-project-id.supabase.co'; // Replace with actual
+  const SUPABASE_ANON_KEY = 'your-anon-key'; // Replace with actual
+
+  let supabase;
+  let phrases = [];
+  let currentIndex = 0;
+  let showingSpanish = true;
+
+  function displayCard() {
+    const phrase = phrases[currentIndex];
+    document.getElementById('flashcard').innerText = showingSpanish ? phrase.spanish : phrase.english;
+  }
+
+  function flipCard() {
+    showingSpanish = !showingSpanish;
+    displayCard();
+  }
+
+  function nextCard() {
+    currentIndex = (currentIndex + 1) % phrases.length;
+    showingSpanish = true;
+    displayCard();
+  }
+
+  async function loadPhrases() {
+    try {
+      const { data, error } = await supabase
+        .from('Spanish_phrases')
+        .select('Spanish, English');
+
+      if (error) throw error;
+
+      phrases = data.map(row => ({
+        spanish: row.Spanish,
+        english: row.English
+      }));
+
+      if (phrases.length > 0) {
+        displayCard();
+      } else {
+        document.getElementById('flashcard').innerText = 'No phrases found.';
+      }
+
+    } catch (err) {
+      console.error('Failed to load phrases from Supabase:', err.message);
+      document.getElementById('flashcard').innerText = 'Error loading data.';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const waitForSupabase = setInterval(() => {
+      if (window.supabase) {
+        clearInterval(waitForSupabase);
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        loadPhrases();
+      }
+    }, 50);
+  });
+</script>
+
+</body>
+</html>
