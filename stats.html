@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Flashcard Statistics</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h2>📊 Flashcard Performance</h2>
+  <p id="results"></p>
+  <button onclick="window.location.href='index.html'">⬅️ Back to Flashcards</button>
+
+  <script>
+    const stats = JSON.parse(localStorage.getItem('flashcardStats') || '{"correct": 0, "attempts": 0}');
+    const percent = stats.attempts ? ((stats.correct / stats.attempts) * 100).toFixed(2) : "0.00";
+    document.getElementById('results').innerText = 
+      `Attempts: ${stats.attempts}
+Correct: ${stats.correct}
+Success Rate: ${percent}%`;
+  </script>
+</body>
+</html>
