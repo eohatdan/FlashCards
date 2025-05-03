@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import psycopg2
 import os
 
 app = Flask(__name__)
-
+CORS(app)
 # Read database config from environment variables
 DB_HOST = os.getenv("DB_HOST")
 DB_NAME = os.getenv("DB_NAME", "postgres")
