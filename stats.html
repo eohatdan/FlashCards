@@ -11,11 +11,13 @@
   <button onclick="window.location.href='newindex.html'">⬅️ Back to Flashcards</button>
 
   <script>
-    const stats = JSON.parse(localStorage.getItem('flashcardStats') || '{"correct": 0, "attempts": 0}');
+    const stats = JSON.parse(localStorage.getItem('flashcardStats') || '{"correct":0,"attempts":0,"mistakes":0}');
     const percent = stats.attempts ? ((stats.correct / stats.attempts) * 100).toFixed(2) : "0.00";
+
     document.getElementById('results').innerText = 
       `Attempts: ${stats.attempts}
 Correct: ${stats.correct}
+Mistakes: ${stats.mistakes}
 Success Rate: ${percent}%`;
   </script>
 </body>
