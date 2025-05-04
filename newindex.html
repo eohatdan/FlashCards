@@ -80,21 +80,26 @@
   }
 
   function nextCard() {
-    const stats = loadStats();
-    stats.attempts += 1;
+  const stats = loadStats();
+  stats.attempts += 1;
 
-    if (answeredCorrectly) {
-      stats.correct += 1;
-    } else {
-      stats.mistakes += 1;
-    }
+  console.log("answeredCorrectly before update:", answeredCorrectly);
 
-    saveStats(stats);
-    answeredCorrectly = true;
-    currentIndex = (currentIndex + 1) % phrases.length;
-    showingSpanish = true;
-    displayCard();
+  if (answeredCorrectly) {
+    stats.correct += 1;
+  } else {
+    stats.mistakes += 1;
   }
+
+  saveStats(stats);
+
+  currentIndex = (currentIndex + 1) % phrases.length;
+  showingSpanish = true;
+  displayCard();
+
+  answeredCorrectly = true;  // reset for next round
+}
+
 
   async function addNewPhrase() {
     const spanish = document.getElementById('newSpanish').value.trim();
