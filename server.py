@@ -90,7 +90,11 @@ def delete_phrase():
         conn.close()
         return jsonify({"status": "success"}), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+
+        return jsonify({"error": str(e)}), 50
+@app.route("/", methods=["GET"])
+def index():
+    return "Flashcards backend is running."
 
 # Required to run locally and on Render
 if __name__ == "__main__":
