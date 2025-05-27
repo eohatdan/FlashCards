@@ -68,7 +68,7 @@
 
     // Load data from backend (adjust URL if needed)
     function loadPhrases() {
-        fetch("https://flashcards-stlt.onrender.com/get_phrases") // replace with your actual Render backend URL
+        fetch("https://flashcards-stlt.onrender.com") // replace with your actual Render backend URL
             .then(response => response.json())
             .then(data => {
                 if (Array.isArray(data) && data.length > 0) {
