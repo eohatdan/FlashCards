@@ -1,114 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Spanish-English Flashcards</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+        #flashcard-container {
+            text-align: center;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 320px;
+        }
+        #phrase {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 14px;
+            margin: 5px 3px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    </style>
 </head>
 <body>
 
-<h2>Spanish-English Flashcards</h2>
-
-<div id="flashcard">Loading...</div>
-
-<div>
-  <button class="flip" onclick="flipCard()">🔄 Flip</button>
-  <button class="next" onclick="nextCard()">➡️ Next</button>
+<div id="flashcard-container">
+    <div id="phrase">Loading...</div>
+    <div class="button-group">
+        <button id="flip-button" disabled>Flip</button>
+        <button id="next-button" disabled>Next</button>
+        <button id="toggle-button" disabled>Toggle Language</button>
+        <button id="randomize-button" disabled>Randomize Phrases</button>
+        <button id="restore-button" disabled>Restore Original</button>
+    </div>
 </div>
 
-<hr>
-
-<h3>Add New Phrase</h3>
-<input id="newSpanish" placeholder="Spanish phrase" />
-<input id="newEnglish" placeholder="English translation" />
-<br>
-<button onclick="addNewPhrase()">💾 Save Phrase</button>
-
 <script>
-  const SUPABASE_URL = 'https://ixxzxenspwzrkiazepbj.supabase.co'; // Replace with actual URL
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4eHp4ZW5zcHd6cmtpYXplcGJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM1MzE1NjMsImV4cCI6MjA1OTEwNzU2M30.28E41uParU4YMisV-Kxlq1KybbOdRrbKqXYKrH84COw'; // Replace with actual key
+    let phrases = [];
+    let originalPhrases = [];
+    let currentPhraseIndex = 0;
+    let showSpanishFirst = true;
+    let isFlipped = false;
 
-  let supabase;
-  let phrases = [];
-  let currentIndex = 0;
-  let showingSpanish = true;
-
-  async function loadPhrases() {
-    try {
-      const { data, error } = await supabase
-        .from('Spanish_phrases')
-        .select('Spanish, English');
-
-      if (error) throw error;
-
-      phrases = data.map(row => ({
-        spanish: row.Spanish,
-        english: row.English
-      }));
-
-      if (phrases.length > 0) {
-        displayCard();
-      } else {
-        document.getElementById('flashcard').innerText = 'No phrases found.';
-      }
-
-    } catch (err) {
-      console.error('Failed to load phrases from Supabase:', err.message);
-      document.getElementById('flashcard').innerText = 'Error loading data.';
-    }
-  }
-
-  function displayCard() {
-    const phrase = phrases[currentIndex];
-    document.getElementById('flashcard').innerText = showingSpanish ? phrase.spanish : phrase.english;
-  }
-
-  function flipCard() {
-    showingSpanish = !showingSpanish;
-    displayCard();
-  }
-
-  function nextCard() {
-    currentIndex = (currentIndex + 1) % phrases.length;
-    showingSpanish = true;
-    displayCard();
-  }
-
-  async function addNewPhrase() {
-    const spanish = document.getElementById('newSpanish').value.trim();
-    const english = document.getElementById('newEnglish').value.trim();
-
-    if (!spanish || !english) {
-      alert("❗ Please enter both a Spanish and English phrase.");
-      return;
+    // Load data from backend (adjust URL if needed)
+    function loadPhrases() {
+        fetch("https://flashcards-stlt.onrender.com") // replace with your actual Render backend URL
+            .then(response => response.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    phrases = [...data];
+                    originalPhrases = [...data]; // backup
+                    updateFlashcard();
+                    enableButtons();
+                } else {
+                    document.getElementById("phrase").innerText = "No data found.";
+                }
+            })
+            .catch(error => {
+                document.getElementById("phrase").innerText = "Error loading data.";
+                console.error('Error:', error);
+            });
     }
 
-    const { error } = await supabase
-      .from('Spanish_phrases')
-      .insert([{ Spanish: spanish, English: english }]);
+    function updateFlashcard() {
+        const phraseElement = document.getElementById("phrase");
+        const currentPhrase = phrases[currentPhraseIndex];
 
-    if (error) {
-      alert("❌ Failed to add phrase: " + error.message);
-      return;
+        if (isFlipped) {
+            phraseElement.innerText = showSpanishFirst ? currentPhrase.english : currentPhrase.spanish;
+        } else {
+            phraseElement.innerText = showSpanishFirst ? currentPhrase.spanish : currentPhrase.english;
+        }
     }
 
-    alert("✅ Phrase added successfully!");
-    document.getElementById('newSpanish').value = '';
-    document.getElementById('newEnglish').value = '';
-    loadPhrases(); // reload to reflect new entry
-  }
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const waitForSupabase = setInterval(() => {
-      if (window.supabase) {
-        clearInterval(waitForSupabase);
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        loadPhrases();
-      }
-    }, 50);
-  });
+    function enableButtons() {
+        document.getElementById("flip-button").disabled = false;
+        document.getElementById("next-button").disabled = false;
+        document.getElementById("toggle-button").disabled = false;
+        document.getElementById("randomize-button").disabled = false;
+        document.getElementById("restore-button").disabled = false;
+    }
+
+    // Button Handlers
+    document.getElementById("flip-button").addEventListener("click", () => {
+        isFlipped = !isFlipped;
+        updateFlashcard();
+    });
+
+    document.getElementById("next-button").addEventListener("click", () => {
+        currentPhraseIndex = (currentPhraseIndex + 1) % phrases.length;
+        isFlipped = false;
+        updateFlashcard();
+    });
+
+    document.getElementById("toggle-button").addEventListener("click", () => {
+        showSpanishFirst = !showSpanishFirst;
+        isFlipped = false;
+        updateFlashcard();
+    });
+
+    document.getElementById("randomize-button").addEventListener("click", () => {
+        shuffle(phrases);
+        currentPhraseIndex = 0;
+        isFlipped = false;
+        updateFlashcard();
+    });
+
+    document.getElementById("restore-button").addEventListener("click", () => {
+        phrases = [...originalPhrases];
+        currentPhraseIndex = 0;
+        isFlipped = false;
+        updateFlashcard();
+    });
+
+    // Load on start
+    loadPhrases();
 </script>
 
 </body>
 </html>
+
