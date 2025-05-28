@@ -1,154 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flashcard App</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-            margin: 0;
-        }
-        #flashcard-container {
-            text-align: center;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            width: 320px;
-        }
-        #phrase {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-        button {
-            padding: 10px 14px;
-            margin: 5px 3px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            background-color: #007BFF;
-            color: white;
-            font-size: 14px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .button-group {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spanish Flashcards</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #app {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 320px;
+    }
+    #card {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
+  <div id="app">
+    <div id="card">Loading...</div>
+    <button onclick="flipCard()">Flip</button>
+    <button onclick="nextCard()">Next</button>
+    <button onclick="toggleLanguage()">Toggle Language</button>
+    <button onclick="randomizePhrases()">Randomize Phrases</button>
+  </div>
 
-<div id="flashcard-container">
-    <div id="phrase">Loading...</div>
-    <div class="button-group">
-        <button id="flip-button" disabled>Flip</button>
-        <button id="next-button" disabled>Next</button>
-        <button id="toggle-button" disabled>Toggle Language</button>
-        <button id="randomize-button" disabled>Randomize Phrases</button>
-        <button id="restore-button" disabled>Restore Original</button>
-    </div>
-</div>
+  <script>
+    const SUPABASE_URL = 'https://ixxzxenspwzrkiazepbj.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4eHp4ZW5zcHd6cmtpYXplcGJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM1MzE1NjMsImV4cCI6MjA1OTEwNzU2M30.28E41uParU4YMisV-Kxlq1KybbOdRrbKqXYKrH84COw';
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-<script>
     let phrases = [];
-    let originalPhrases = [];
-    let currentPhraseIndex = 0;
-    let showSpanishFirst = true;
+    let currentIndex = 0;
+    let showSpanish = true;
     let isFlipped = false;
 
-    // Load data from backend (adjust URL if needed)
-    function loadPhrases() {
-        fetch("https://flashcards-stlt.onrender.com") // replace with your actual Render backend URL
-            .then(response => response.json())
-            .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    phrases = [...data];
-                    originalPhrases = [...data]; // backup
-                    updateFlashcard();
-                    enableButtons();
-                } else {
-                    document.getElementById("phrase").innerText = "No data found.";
-                }
-            })
-            .catch(error => {
-                document.getElementById("phrase").innerText = "Error loading data.";
-                console.error('Error:', error);
-                console.log("JSON response: ",response.json());
-            });
+    async function loadPhrases() {
+      const { data, error } = await client.from('Spanish_phrases').select('Spanish, English');
+      if (error || !data) {
+        document.getElementById('card').innerText = 'Failed to load phrases';
+        return;
+      }
+      phrases = data;
+      displayCard();
     }
 
-    function updateFlashcard() {
-        const phraseElement = document.getElementById("phrase");
-        const currentPhrase = phrases[currentPhraseIndex];
-
-        if (isFlipped) {
-            phraseElement.innerText = showSpanishFirst ? currentPhrase.english : currentPhrase.spanish;
-        } else {
-            phraseElement.innerText = showSpanishFirst ? currentPhrase.spanish : currentPhrase.english;
-        }
+    function displayCard() {
+      const card = document.getElementById('card');
+      const phrase = phrases[currentIndex];
+      card.innerText = isFlipped
+        ? (showSpanish ? phrase.English : phrase.Spanish)
+        : (showSpanish ? phrase.Spanish : phrase.English);
     }
 
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
+    function flipCard() {
+      isFlipped = !isFlipped;
+      displayCard();
     }
 
-    function enableButtons() {
-        document.getElementById("flip-button").disabled = false;
-        document.getElementById("next-button").disabled = false;
-        document.getElementById("toggle-button").disabled = false;
-        document.getElementById("randomize-button").disabled = false;
-        document.getElementById("restore-button").disabled = false;
+    function nextCard() {
+      currentIndex = (currentIndex + 1) % phrases.length;
+      isFlipped = false;
+      displayCard();
     }
 
-    // Button Handlers
-    document.getElementById("flip-button").addEventListener("click", () => {
-        isFlipped = !isFlipped;
-        updateFlashcard();
-    });
+    function toggleLanguage() {
+      showSpanish = !showSpanish;
+      isFlipped = false;
+      displayCard();
+    }
 
-    document.getElementById("next-button").addEventListener("click", () => {
-        currentPhraseIndex = (currentPhraseIndex + 1) % phrases.length;
-        isFlipped = false;
-        updateFlashcard();
-    });
+    function randomizePhrases() {
+      for (let i = phrases.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [phrases[i], phrases[j]] = [phrases[j], phrases[i]];
+      }
+      currentIndex = 0;
+      isFlipped = false;
+      displayCard();
+    }
 
-    document.getElementById("toggle-button").addEventListener("click", () => {
-        showSpanishFirst = !showSpanishFirst;
-        isFlipped = false;
-        updateFlashcard();
-    });
-
-    document.getElementById("randomize-button").addEventListener("click", () => {
-        shuffle(phrases);
-        currentPhraseIndex = 0;
-        isFlipped = false;
-        updateFlashcard();
-    });
-
-    document.getElementById("restore-button").addEventListener("click", () => {
-        phrases = [...originalPhrases];
-        currentPhraseIndex = 0;
-        isFlipped = false;
-        updateFlashcard();
-    });
-
-    // Load on start
     loadPhrases();
-</script>
-
+  </script>
 </body>
 </html>
-
