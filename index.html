@@ -83,6 +83,7 @@
             .catch(error => {
                 document.getElementById("phrase").innerText = "Error loading data.";
                 console.error('Error:', error);
+                console.log("JSON response: ",response.json());
             });
     }
 
