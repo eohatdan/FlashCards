@@ -20,24 +20,33 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       text-align: center;
-      width: 320px;
+      width: 360px;
     }
     #card {
-      font-size: 24px;
+      font-size: 20px;
       margin-bottom: 20px;
     }
-    button {
+    button, input, textarea {
       margin: 5px;
-      padding: 10px 15px;
-      font-size: 16px;
-      border: none;
+      padding: 10px;
+      font-size: 14px;
       border-radius: 5px;
+    }
+    button {
+      border: none;
       background-color: #007bff;
       color: white;
       cursor: pointer;
     }
     button:hover {
       background-color: #0056b3;
+    }
+    textarea {
+      width: 90%;
+      height: 40px;
+    }
+    input[type="number"] {
+      width: 60px;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
@@ -49,6 +58,22 @@
     <button onclick="nextCard()">Next</button>
     <button onclick="toggleLanguage()">Toggle Language</button>
     <button onclick="randomizePhrases()">Randomize Phrases</button>
+
+    <hr />
+    <h4>Edit Current Phrase</h4>
+    <textarea id="edit-spanish" placeholder="Edit Spanish"></textarea><br />
+    <textarea id="edit-english" placeholder="Edit English"></textarea><br />
+    <button onclick="savePhrase()">Save</button>
+    <button onclick="deletePhrase()">Delete</button>
+
+    <h4>Add New Phrase</h4>
+    <textarea id="new-spanish" placeholder="New Spanish"></textarea><br />
+    <textarea id="new-english" placeholder="New English"></textarea><br />
+    <button onclick="addPhrase()">Add</button>
+
+    <h4>Set Start Row</h4>
+    <input type="number" id="start-row" min="0" value="0" />
+    <button onclick="loadPhrases()">Load From Row</button>
   </div>
 
   <script>
@@ -62,18 +87,23 @@
     let isFlipped = false;
 
     async function loadPhrases() {
-      const { data, error } = await client.from('Spanish_phrases').select('Spanish, English');
+      const startRow = parseInt(document.getElementById('start-row').value) || 0;
+      const { data, error } = await client.from('Spanish_phrases').select('id, Spanish, English');
       if (error || !data) {
         document.getElementById('card').innerText = 'Failed to load phrases';
         return;
       }
-      phrases = data;
+      phrases = data.slice(startRow);
+      currentIndex = 0;
       displayCard();
     }
 
     function displayCard() {
+      if (phrases.length === 0) return;
       const card = document.getElementById('card');
       const phrase = phrases[currentIndex];
+      document.getElementById('edit-spanish').value = phrase.Spanish;
+      document.getElementById('edit-english').value = phrase.English;
       card.innerText = isFlipped
         ? (showSpanish ? phrase.English : phrase.Spanish)
         : (showSpanish ? phrase.Spanish : phrase.English);
@@ -104,6 +134,40 @@
       currentIndex = 0;
       isFlipped = false;
       displayCard();
+    }
+
+    async function savePhrase() {
+      const spanish = document.getElementById('edit-spanish').value;
+      const english = document.getElementById('edit-english').value;
+      const id = phrases[currentIndex].id;
+      const { error } = await client.from('Spanish_phrases').update({ Spanish: spanish, English: english }).eq('id', id);
+      if (!error) {
+        phrases[currentIndex].Spanish = spanish;
+        phrases[currentIndex].English = english;
+        displayCard();
+      }
+    }
+
+    async function deletePhrase() {
+      const id = phrases[currentIndex].id;
+      const { error } = await client.from('Spanish_phrases').delete().eq('id', id);
+      if (!error) {
+        phrases.splice(currentIndex, 1);
+        currentIndex = Math.min(currentIndex, phrases.length - 1);
+        displayCard();
+      }
+    }
+
+    async function addPhrase() {
+      const spanish = document.getElementById('new-spanish').value;
+      const english = document.getElementById('new-english').value;
+      const { data, error } = await client.from('Spanish_phrases').insert([{ Spanish: spanish, English: english }]);
+      if (!error) {
+        phrases.push(data[0]);
+        document.getElementById('new-spanish').value = '';
+        document.getElementById('new-english').value = '';
+        alert('Phrase added');
+      }
     }
 
     loadPhrases();
