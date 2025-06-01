@@ -45,7 +45,7 @@
       width: 90%;
       height: 40px;
     }
-    input[type="number"] {
+    input[type="number"], input[readonly] {
       width: 60px;
     }
   </style>
@@ -65,6 +65,8 @@
     <textarea id="edit-english" placeholder="Edit English"></textarea><br />
     <button onclick="savePhrase()">Save</button>
     <button onclick="deletePhrase()">Delete</button>
+    <br />
+    <label>Row ID: <input type="number" id="row-id" readonly /></label>
 
     <h4>Add New Phrase</h4>
     <textarea id="new-spanish" placeholder="New Spanish"></textarea><br />
@@ -104,6 +106,7 @@
       const phrase = phrases[currentIndex];
       document.getElementById('edit-spanish').value = phrase.Spanish;
       document.getElementById('edit-english').value = phrase.English;
+      document.getElementById('row-id').value = phrase.id;
       card.innerText = isFlipped
         ? (showSpanish ? phrase.English : phrase.Spanish)
         : (showSpanish ? phrase.Spanish : phrase.English);
